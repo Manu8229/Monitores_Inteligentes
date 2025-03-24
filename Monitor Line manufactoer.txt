@@ -1,0 +1,178 @@
+Exercício: Monitoramento Inteligente de Sensores na Indústria 4.0
+Contexto:
+Em uma fábrica automatizada, diversos sensores monitoram a temperatura e a 
+vibração das máquinas para prever falhas e melhorar a manutenção. Você foi designado para 
+desenvolver um programa em Python que analisa os dados desses sensores e gera alertas quando 
+valores críticos são atingidos.
+
+Desafio 1: Leitura e Armazenamento de Dados
+Crie um programa que armazene leituras de sensores em uma lista de dicionários. Cada sensor deve registrar:
+
+ID da máquina (string)
+Temperatura (°C) (flutuante)
+Vibração (mm/s) (flutuante)
+Tarefa: Gere 10 leituras fictícias e armazene em uma lista.
+
+Desafio 2: Identificação de Anomalias
+Adicione uma função que analisa os dados armazenados e verifica se alguma máquina apresenta valores críticos:
+
+Temperatura acima de 80°C
+Vibração acima de 10 mm/s
+Se um desses valores for excedido, exiba um alerta com o ID da máquina e a leitura correspondente.
+
+Desafio 3: Relatório Resumido
+Crie uma função que gera um relatório com:
+
+A temperatura média das máquinas
+A vibração média das máquinas
+O número total de alertas gerados
+O relatório deve ser exibido atraves de um desboard
+
+import random
+import time
+import csv
+import matplotlib.pyplot as plt
+from itertools import count
+
+def gerar_leituras(num_leituras):
+    """ Gera leituras fictícias de sensores """
+    leituras = []
+    for i in range(num_leituras):
+        id_maquina = f"MAQ{i+1}"
+        temperatura = round(random.uniform(50, 100), 2)
+        vibracao = round(random.uniform(5, 15), 2)
+        leitura = {
+            "ID da máquina": id_maquina,
+            "Temperatura (°C)": temperatura,
+            "Vibração (mm/s)": vibracao
+        }
+        leituras.append(leitura)
+    return leituras
+
+def verificar_anomalias(leituras):
+    """ Verifica anomalias nas leituras dos sensores """
+    alertas = []
+    for leitura in leituras:
+        if leitura["Temperatura (°C)"] > 80:
+            alertas.append((leitura["ID da máquina"], "Temperatura", leitura["Temperatura (°C)"]))
+        if leitura["Vibração (mm/s)"] > 10:
+            alertas.append((leitura["ID da máquina"], "Vibração", leitura["Vibração (mm/s)"]))
+    return alertas
+
+def gerar_relatorio(leituras, alertas):
+    """ Gera um relatório resumido com estatísticas das leituras """
+    total_leituras = len(leituras)
+    total_alertas = len(alertas)
+    
+    temperatura_media = sum(leitura["Temperatura (°C)"] for leitura in leituras) / total_leituras
+    vibracao_media = sum(leitura["Vibração (mm/s)"] for leitura in leituras) / total_leituras
+    
+    print("\n--- Relatório Resumido ---")
+    print(f"Temperatura média: {temperatura_media:.2f} °C")
+    print(f"Vibração média: {vibracao_media:.2f} mm/s")
+    print(f"Total de alertas gerados: {total_alertas}")
+
+def salvar_dados_csv(leituras, timestamp):
+    """ Salva os dados em um arquivo CSV """
+    with open("dados_sensores.csv", mode="a", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=["Timestamp", "ID da máquina", "Temperatura (°C)", "Vibração (mm/s)"])
+        if file.tell() == 0:
+            writer.writeheader()
+        for leitura in leituras:
+            writer.writerow({"Timestamp": timestamp, **leitura})
+    print("\nDados salvos no arquivo 'dados_sensores.csv'.")
+
+def exibir_dashboard(leituras):
+    """ Exibe gráficos de temperatura e vibração com alertas destacados """
+    ids = [leitura["ID da máquina"] for leitura in leituras]
+    temperaturas = [leitura["Temperatura (°C)"] for leitura in leituras]
+    vibracoes = [leitura["Vibração (mm/s)"] for leitura in leituras]
+    
+    cores_temp = ['red' if temp > 80 else 'blue' for temp in temperaturas]
+    cores_vib = ['red' if vib > 10 else 'green' for vib in vibracoes]
+
+    plt.clf()
+    fig, ax = plt.subplots(2, 1, figsize=(10, 8))
+    
+    ax[0].bar(ids, temperaturas, color=cores_temp)
+    ax[0].axhline(y=80, color='red', linestyle='--', label='Limite de Temperatura')
+    ax[0].set_title('Temperatura das Máquinas')
+    ax[0].set_ylabel('Temperatura (°C)')
+    ax[0].legend()
+    
+    ax[1].bar(ids, vibracoes, color=cores_vib)
+    ax[1].axhline(y=10, color='red', linestyle='--', label='Limite de Vibração')
+    ax[1].set_title('Vibração das Máquinas')
+    ax[1].set_ylabel('Vibração (mm/s)')
+    ax[1].legend()
+    
+    plt.tight_layout()
+    plt.pause(1)
+
+def main():
+    """ Loop principal para simulação contínua a cada 1 minuto """
+    plt.ion()  # Modo interativo do Matplotlib
+    contador = count(start=1)
+    
+    while True:
+        timestamp = f"Leitura {next(contador)}"
+        print(f"\n{timestamp}: Gerando novas leituras...")
+        
+        leituras_sensores = gerar_leituras(10)
+        alertas = verificar_anomalias(leituras_sensores)
+        
+        print("\nAlertas de anomalias:")
+        for alerta in alertas:
+            print(f"ALERTA: Máquina {alerta[0]} com {alerta[1]} crítica de {alerta[2]}")
+        
+        gerar_relatorio(leituras_sensores, alertas)
+        salvar_dados_csv(leituras_sensores, timestamp)
+        exibir_dashboard(leituras_sensores)
+        
+        time.sleep(60)  # Aguarda 1 minuto antes de gerar novas leituras
+
+if __name__ == "__main__":
+    main()
+
+
+Sugestões para Melhorias 🔧
+Adição de núcleos para destacar alertas no gráfico:
+
+Você pode mudar a cor das barras que ultrapassam os limites crí
+Gerar leituras em tempo real (Desafio Extra):
+
+Usando um loop com time.sleep(2), v
+Salvar os dados em um arquivo CSV ou banco de dados:
+
+Isso permitiria analisar as tendências ao
+Melhoria na exibição dos alertas:
+
+Integração:
+
+Para integrar esse programa a sensores reais no contexto da Indústria 4.0, seria necessário
+
+1. Hardware
+Sensores Industriais :
+Temperatura : Sen
+Vibração : S
+Controlador ou Gateway IoT:
+Pode ser um Raspberry Pi, ESP32, Arduino, ou um **PLC (ControladorPLC (Controlador Lógico Programável) pa
+Interfaces de Comunicação :
+Modbus (RTU/TCP) : Um
+MQTT :
+OPC UA:Padrã
+Wi-Fi, Ethernet ou 4G/5G : Para enviar
+2. Programas
+Leitura dos Sensores
+Código para coleta de dados via GPIO (Arduino/Raspberry Pi) , *Modbus (PLC) ouAPIs MQTT/OPC UA .
+Banco de Dados
+Atualmente, você salva os dados em um CSV. Para produção, é melhor usar um banco como PostgreSQL, MySQL ou InfluxDB (especial
+Dashboard e Monitoramento
+Ferramentas como Grafana, Power BI ou um sistema web próprio com Flask/Django + React para ex
+3. Infraestrutura e Cloud (Opcional)
+Servidores locais ou na nuvem (AWS, Azure, Google Cloud)
+Serviços IoT específicos :
+4. Segurança e Manutenção
+Protocolo seguro (TLS/SSL) para transmissão de dados
+Autenticação e controle de acesso aos sensores
+Monitoramento remoto e alertas via e-mail, SMS ou notificações push
