@@ -1,0 +1,9 @@
+O projeto "Monitores_Inteligentes" contém um script Python que realiza as seguintes funções principais:
+
+Gerar Leituras: Gera leituras fictícias de sensores para várias máquinas, incluindo temperatura e vibração.
+Verificar Anomalias: Verifica se as leituras excedem limites críticos (temperatura > 80°C ou vibração > 10 mm/s) e gera alertas.
+Gerar Relatório: Gera um relatório resumido com estatísticas das leituras.
+Salvar Dados em CSV: Salva as leituras em um arquivo CSV.
+Exibir Dashboard: Exibe gráficos de temperatura e vibração, destacando anomalias.
+Loop Principal: Executa continuamente, gerando novas leituras a cada minuto, verificando anomalias, gerando relatórios, 
+salvando dados e atualizando o dashboard.
